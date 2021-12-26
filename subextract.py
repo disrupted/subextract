@@ -17,8 +17,8 @@ parser.add_argument(
 
 args = parser.parse_args()
 path = Path(args.file.name)
-if path.stem not in ".mkv":
-    print(f"wrong file extension {path.stem}")
+if path.suffix not in ".mkv":
+    logging.error(f"wrong file extension {path.suffix}")
     sys.exit(1)
 
 
