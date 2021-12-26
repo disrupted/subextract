@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import logging
 import subprocess
 import sys
 from pathlib import Path
@@ -51,12 +52,12 @@ data = identify(args.file.name)
 tracks = [track for track in data["tracks"] if filter(track)]
 
 if not tracks:
-    print("no matching subtitle tracks found")
+    logging.warning("no matching subtitle tracks found")
     sys.exit(1)
 
 for track in tracks:
     try:
-        print(yaml.dump(track))
+        logging.info(yaml.dump(track))
         sub_name = path.stem + ".en.srt"
         mkvextract(track["id"], sub_name)
         break
