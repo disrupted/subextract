@@ -40,16 +40,16 @@ def identify(filename: str) -> dict:
     return json.loads(result.stdout)
 
 
-def filter(track: dict) -> bool:
+def is_lang(track: dict, lang: str) -> bool:
     return (
         track["codec"] == "SubRip/SRT"
-        and track["properties"]["language"] in "eng"  # TODO: use language enum
+        and track["properties"]["language"] in lang  # TODO: use language enum
         and not track["properties"]["forced_track"]
     )
 
 
 data = identify(args.file.name)
-tracks = [track for track in data["tracks"] if filter(track)]
+tracks = filter(lambda t: is_lang(t, "eng"), data)
 
 if not tracks:
     logging.warning("no matching subtitle tracks found")
