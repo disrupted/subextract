@@ -8,7 +8,9 @@ from pathlib import Path
 
 import yaml
 
-parser = argparse.ArgumentParser(description="SubExtract")
+from language import Language
+
+parser = argparse.ArgumentParser(description="Extract subtitles from mkv files")
 parser.add_argument(
     "file",
     metavar="F",
@@ -23,7 +25,7 @@ if path.suffix not in ".mkv":
     sys.exit(1)
 
 
-def mkvextract(track_id, out_filename):
+def mkvextract(track_id: int, out_filename: str):
     mkvextract_args = [
         "mkvextract",
         args.file.name,
@@ -40,16 +42,20 @@ def identify(filename: str) -> dict:
     return json.loads(result.stdout)
 
 
-def is_lang(track: dict, lang: str) -> bool:
+def is_lang(track: dict, lang: Language) -> bool:
     return (
         track["codec"] == "SubRip/SRT"
-        and track["properties"]["language"] in lang  # TODO: use language enum
+        and track["properties"]["language_ietf"] in lang
         and not track["properties"]["forced_track"]
     )
 
 
+def get_out_name(path: Path, track: dict) -> str:
+    return f"{path.stem}.{track['properties']['language_ietf']}.srt"
+
+
 data = identify(args.file.name)
-tracks = filter(lambda t: is_lang(t, "eng"), data)
+tracks = filter(lambda t: is_lang(t, Language.ENGLISH), data)
 
 if not tracks:
     logging.warning("no matching subtitle tracks found")
@@ -58,7 +64,7 @@ if not tracks:
 for track in tracks:
     try:
         logging.info(yaml.dump(track))
-        sub_name = path.stem + ".en.srt"
+        sub_name = get_out_name(path, track)
         mkvextract(track["id"], sub_name)
         break
     except KeyError:
