@@ -102,9 +102,9 @@ def main():
         if args.id:
             tracks = [data["tracks"][args.id]]
         else:
-            tracks = filter(lambda t: is_lang(t, args.lang), data["tracks"])
+            tracks = [t for t in data["tracks"] if is_lang(t, args.lang)]
 
-        if not list(tracks):
+        if not tracks:
             logging.warning("no matching subtitle tracks found")
             sys.exit(1)
 
