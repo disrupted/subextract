@@ -21,6 +21,13 @@ parser.add_argument(
     default="INFO",
 )
 parser.add_argument(
+    "-l",
+    "--lang",
+    type=lambda l: Language[l.upper()],
+    help=f"Language to extract (default: {Language.EN.value})",
+    default=Language.EN,
+)
+parser.add_argument(
     "file",
     metavar="F",
     type=argparse.FileType("r"),
@@ -65,7 +72,7 @@ def get_out_name(path: Path, track: dict) -> str:
 
 
 data = identify(args.file.name)
-tracks = filter(lambda t: is_lang(t, Language.ENGLISH), data)
+tracks = filter(lambda t: is_lang(t, args.lang), data)
 
 if not tracks:
     logging.warning("no matching subtitle tracks found")
