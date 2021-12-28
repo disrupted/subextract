@@ -35,9 +35,9 @@ group.add_argument(
 )
 group.add_argument(
     "--lang",
-    type=lambda l: Language[l.upper()],
-    help=f"Language to extract (default: {Language.EN.value})",
-    default=Language.EN,
+    type=Language,
+    help="Language to extract (default: en)",
+    default=Language("en"),
 )
 parser.add_argument(
     "file",
@@ -68,13 +68,14 @@ def identify(path: Path) -> dict:
 def is_lang(track: dict, lang: Language) -> bool:
     return (
         track["codec"] == "SubRip/SRT"
-        and track["properties"]["language_ietf"] == lang.value
+        and track["properties"]["language"] == lang.alpha2
         and not track["properties"]["forced_track"]
     )
 
 
 def get_out_name(path: Path, track: dict) -> str:
-    return f"{path.stem}.{track['properties']['language_ietf']}.srt"
+    lang = Language(track["properties"]["language"]).alpha1
+    return f"{path.stem}.{lang}.srt"
 
 
 def extract(path: Path, track: dict):
@@ -99,20 +100,21 @@ def main():
         data = identify(path)
 
         if args.id:
-            tracks = [data["tracks"][args.id]]
+            try:
+                tracks = [data["tracks"][args.id]]
+            except IndexError:
+                logging.error(f"subtitle with id {args.id} doesn't exist")
+                sys.exit(1)
         else:
-            tracks = filter(lambda t: is_lang(t, args.lang), data["tracks"])
-
-        if not tracks:
-            logging.warning("no matching subtitle tracks found")
-            sys.exit(1)
+            tracks = [t for t in data["tracks"] if is_lang(t, args.lang)]
+            if not tracks:
+                logging.warning("no matching subtitle tracks found")
+                sys.exit(1)
+            logging.debug("found matching tracks\n" + yaml.dump(tracks))
 
         for track in tracks:
-            try:
-                extract(path, track)
-                break
-            except KeyError as e:
-                logging.error(e)
+            extract(path, track)
+            break
 
     sys.exit(0)
 
