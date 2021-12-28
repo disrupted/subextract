@@ -9,7 +9,7 @@ from pathlib import Path
 
 import yaml
 
-from language import Language
+from .language import Language
 
 PACKAGE = "subextract"
 
