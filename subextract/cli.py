@@ -36,7 +36,7 @@ group.add_argument(
 group.add_argument(
     "--lang",
     type=Language,
-    help=f"Language to extract (default: en)",
+    help="Language to extract (default: en)",
     default=Language("en"),
 )
 parser.add_argument(
