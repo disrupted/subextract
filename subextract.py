@@ -17,8 +17,8 @@ parser.add_argument(
     action="store_const",
     help="Increase output verbosity",
     dest="log_level",
-    const="DEBUG",
-    default="INFO",
+    const=logging.DEBUG,
+    default=logging.INFO,
 )
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
@@ -47,14 +47,14 @@ def mkvextract(track_id: int, path: Path, out_filename: str):
         "tracks",
         f"{track_id}:{out_filename}",
     ]
-    result = subprocess.run(mkvextract_args)
-    return result
+    proc = subprocess.run(mkvextract_args)
+    return proc
 
 
-def identify(filename: str) -> dict:
-    mkvmerge_args = ["mkvmerge", "-F", "json", "-i", filename]
-    result = subprocess.run(mkvmerge_args, stdout=subprocess.PIPE)
-    return json.loads(result.stdout)
+def identify(path: Path) -> dict:
+    mkvmerge_args = ["mkvmerge", "-F", "json", "-i", path]
+    proc = subprocess.run(mkvmerge_args, stdout=subprocess.PIPE)
+    return json.loads(proc.stdout)
 
 
 def is_lang(track: dict, lang: Language) -> bool:
@@ -78,13 +78,16 @@ def extract(path: Path, track: dict):
 
 def main():
     args = parser.parse_args()
-    logging.basicConfig(level=args.log_level)  # TODO: format
+    logging.basicConfig(
+        level=args.log_level,
+        format="%(levelname)s | %(message)s",
+    )
     path = Path(args.file.name)
     if path.suffix not in ".mkv":
         logging.error(f"wrong file extension {path.suffix}")
         sys.exit(1)
 
-    data = identify(args.file.name)
+    data = identify(path)
 
     if args.id:
         tracks = [data["tracks"][args.id]]
