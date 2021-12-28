@@ -6,7 +6,7 @@ authors = ["disrupted <hi@salomonpopp.me>"]
 license = "GPL-3.0"
 
 [tool.poetry.scripts]
-subextract = 'subextract:main'
+subextract = 'subextract.cli:main'
 
 [tool.poetry.dependencies]
 python = "^3.9"

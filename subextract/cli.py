@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import argparse
-import importlib.metadata
 import json
 import logging
 import subprocess
@@ -9,9 +8,8 @@ from pathlib import Path
 
 import yaml
 
-from language import Language
-
-PACKAGE = "subextract"
+from . import __version__
+from .language import Language
 
 parser = argparse.ArgumentParser(description="Extract subtitles from mkv files")
 parser.add_argument(
@@ -27,7 +25,7 @@ parser.add_argument(
     "-V",
     "--version",
     action="version",
-    version="%(prog)s " + importlib.metadata.version(PACKAGE),
+    version="%(prog)s " + __version__,
 )
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
