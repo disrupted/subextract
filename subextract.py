@@ -20,8 +20,13 @@ parser.add_argument(
     const="DEBUG",
     default="INFO",
 )
-parser.add_argument(
-    "-l",
+group = parser.add_mutually_exclusive_group()
+group.add_argument(
+    "--id",
+    type=int,
+    help="Track id to extract",
+)
+group.add_argument(
     "--lang",
     type=lambda l: Language[l.upper()],
     help=f"Language to extract (default: {Language.EN.value})",
@@ -35,7 +40,7 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-logging.basicConfig(level=args.log_level)
+logging.basicConfig(level=args.log_level)  # TODO: format
 path = Path(args.file.name)
 if path.suffix not in ".mkv":
     logging.error(f"wrong file extension {path.suffix}")
@@ -71,8 +76,19 @@ def get_out_name(path: Path, track: dict) -> str:
     return f"{path.stem}.{track['properties']['language_ietf']}.srt"
 
 
+def extract(path: Path, track: dict):
+    logging.info("Extracting subtitle")
+    print(yaml.dump(track))
+    sub_name = get_out_name(path, track)
+    mkvextract(track["id"], sub_name)
+
+
 data = identify(args.file.name)
-tracks = filter(lambda t: is_lang(t, args.lang), data["tracks"])
+
+if args.id:
+    tracks = [data["tracks"][args.id]]
+else:
+    tracks = filter(lambda t: is_lang(t, args.lang), data["tracks"])
 
 if not tracks:
     logging.warning("no matching subtitle tracks found")
@@ -80,12 +96,9 @@ if not tracks:
 
 for track in tracks:
     try:
-        logging.info("Extracting subtitle")
-        print(yaml.dump(track))
-        sub_name = get_out_name(path, track)
-        mkvextract(track["id"], sub_name)
+        extract(path, track)
         break
-    except KeyError:
-        continue
+    except KeyError as e:
+        logging.error(e)
 
 sys.exit(0)
