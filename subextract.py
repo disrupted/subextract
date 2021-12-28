@@ -12,6 +12,15 @@ from language import Language
 
 parser = argparse.ArgumentParser(description="Extract subtitles from mkv files")
 parser.add_argument(
+    "-v",
+    "--verbose",
+    action="store_const",
+    help="Increase output verbosity",
+    dest="log_level",
+    const="DEBUG",
+    default="INFO",
+)
+parser.add_argument(
     "file",
     metavar="F",
     type=argparse.FileType("r"),
@@ -19,6 +28,7 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
+logging.basicConfig(level=args.log_level)
 path = Path(args.file.name)
 if path.suffix not in ".mkv":
     logging.error(f"wrong file extension {path.suffix}")
