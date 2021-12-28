@@ -39,18 +39,11 @@ parser.add_argument(
     help="the .mkv video file",
 )
 
-args = parser.parse_args()
-logging.basicConfig(level=args.log_level)  # TODO: format
-path = Path(args.file.name)
-if path.suffix not in ".mkv":
-    logging.error(f"wrong file extension {path.suffix}")
-    sys.exit(1)
 
-
-def mkvextract(track_id: int, out_filename: str):
+def mkvextract(track_id: int, path: Path, out_filename: str):
     mkvextract_args = [
         "mkvextract",
-        args.file.name,
+        path,
         "tracks",
         f"{track_id}:{out_filename}",
     ]
@@ -80,25 +73,37 @@ def extract(path: Path, track: dict):
     logging.info("Extracting subtitle")
     print(yaml.dump(track))
     sub_name = get_out_name(path, track)
-    mkvextract(track["id"], sub_name)
+    mkvextract(track["id"], path, sub_name)
 
 
-data = identify(args.file.name)
+def main():
+    args = parser.parse_args()
+    logging.basicConfig(level=args.log_level)  # TODO: format
+    path = Path(args.file.name)
+    if path.suffix not in ".mkv":
+        logging.error(f"wrong file extension {path.suffix}")
+        sys.exit(1)
 
-if args.id:
-    tracks = [data["tracks"][args.id]]
-else:
-    tracks = filter(lambda t: is_lang(t, args.lang), data["tracks"])
+    data = identify(args.file.name)
 
-if not tracks:
-    logging.warning("no matching subtitle tracks found")
-    sys.exit(1)
+    if args.id:
+        tracks = [data["tracks"][args.id]]
+    else:
+        tracks = filter(lambda t: is_lang(t, args.lang), data["tracks"])
 
-for track in tracks:
-    try:
-        extract(path, track)
-        break
-    except KeyError as e:
-        logging.error(e)
+    if not tracks:
+        logging.warning("no matching subtitle tracks found")
+        sys.exit(1)
 
-sys.exit(0)
+    for track in tracks:
+        try:
+            extract(path, track)
+            break
+        except KeyError as e:
+            logging.error(e)
+
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
