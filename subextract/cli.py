@@ -107,17 +107,14 @@ def main():
                 sys.exit(1)
         else:
             tracks = [t for t in data["tracks"] if is_lang(t, args.lang)]
-
-        if not tracks:
-            logging.warning("no matching subtitle tracks found")
-            sys.exit(1)
+            if not tracks:
+                logging.warning("no matching subtitle tracks found")
+                sys.exit(1)
+            logging.debug("found matching tracks\n" + yaml.dump(tracks))
 
         for track in tracks:
-            try:
-                extract(path, track)
-                break
-            except KeyError as e:
-                logging.error(e)
+            extract(path, track)
+            break
 
     sys.exit(0)
 
