@@ -100,7 +100,11 @@ def main():
         data = identify(path)
 
         if args.id:
-            tracks = [data["tracks"][args.id]]
+            try:
+                tracks = [data["tracks"][args.id]]
+            except IndexError:
+                logging.error(f"subtitle with id {args.id} doesn't exist")
+                sys.exit(1)
         else:
             tracks = [t for t in data["tracks"] if is_lang(t, args.lang)]
 
