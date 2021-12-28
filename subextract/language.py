@@ -3,7 +3,6 @@ import langcodes
 
 class Language:
     def __init__(self, lang: str):
-        self._raw: str = lang
         self._lang = langcodes.Language.get(lang)
 
     @property
