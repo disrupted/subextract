@@ -34,7 +34,8 @@ group.add_argument(
 )
 parser.add_argument(
     "file",
-    metavar="F",
+    nargs="+",
+    metavar="FILE",
     type=argparse.FileType("r"),
     help="the .mkv video file",
 )
@@ -82,28 +83,29 @@ def main():
         level=args.log_level,
         format="%(levelname)s | %(message)s",
     )
-    path = Path(args.file.name)
-    if path.suffix not in ".mkv":
-        logging.error(f"wrong file extension {path.suffix}")
-        sys.exit(1)
+    for f in args.file:
+        path = Path(f.name)
+        if path.suffix not in ".mkv":
+            logging.error(f"wrong file extension {path.suffix}")
+            sys.exit(1)
 
-    data = identify(path)
+        data = identify(path)
 
-    if args.id:
-        tracks = [data["tracks"][args.id]]
-    else:
-        tracks = filter(lambda t: is_lang(t, args.lang), data["tracks"])
+        if args.id:
+            tracks = [data["tracks"][args.id]]
+        else:
+            tracks = filter(lambda t: is_lang(t, args.lang), data["tracks"])
 
-    if not tracks:
-        logging.warning("no matching subtitle tracks found")
-        sys.exit(1)
+        if not tracks:
+            logging.warning("no matching subtitle tracks found")
+            sys.exit(1)
 
-    for track in tracks:
-        try:
-            extract(path, track)
-            break
-        except KeyError as e:
-            logging.error(e)
+        for track in tracks:
+            try:
+                extract(path, track)
+                break
+            except KeyError as e:
+                logging.error(e)
 
     sys.exit(0)
 
