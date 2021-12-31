@@ -53,7 +53,7 @@ def mkvextract(track_id: int, path: Path, out_filename: str):
         "mkvextract",
         path,
         "tracks",
-        f"{track_id}:{out_filename}",
+        f"{track_id}:{path.with_name(out_filename)}",
     ]
     proc = subprocess.run(mkvextract_args)
     return proc
