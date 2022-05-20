@@ -11,7 +11,7 @@ import yaml
 from . import __version__
 from .language import Language
 
-parser = argparse.ArgumentParser(description="Extract subtitles from mkv files")
+parser = argparse.ArgumentParser(description="Extract subtitles from MKV files")
 parser.add_argument(
     "-v",
     "--verbose",
