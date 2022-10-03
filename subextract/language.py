@@ -1,9 +1,17 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+
 import langcodes
 
 
+@dataclass(frozen=True)
 class Language:
-    def __init__(self, lang: str):
-        self._lang = langcodes.Language.get(lang)
+    _lang: langcodes.Language
+
+    @staticmethod
+    def from_str(lang: str) -> Language:
+        return Language(langcodes.Language.get(lang))
 
     @property
     def alpha1(self):
@@ -14,3 +22,6 @@ class Language:
     def alpha2(self):
         """eng"""
         return self._lang.to_alpha3(variant="B")
+
+
+DEFAULT_LANGUAGE = Language.from_str(langcodes.DEFAULT_LANGUAGE)
