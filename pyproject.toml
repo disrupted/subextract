@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "subextract"
-version = "0.2.0"
+version = "0.2.1"
 description = "CLI for easy extraction of subtitles from mkv files"
 authors = ["disrupted <hi@salomonpopp.me>"]
 license = "GPL-3.0"
