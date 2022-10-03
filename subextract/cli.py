@@ -9,7 +9,7 @@ from pathlib import Path
 import yaml
 
 from . import __version__
-from .language import Language
+from .language import DEFAULT_LANGUAGE, Language
 
 parser = argparse.ArgumentParser(description="Extract subtitles from MKV files")
 parser.add_argument(
@@ -34,9 +34,8 @@ parser.add_argument(
 )
 parser.add_argument(
     "--lang",
-    type=Language,
     help="Language to extract (default: en)",
-    default=Language("en"),
+    default=DEFAULT_LANGUAGE,
 )
 parser.add_argument(
     "--sdh",
@@ -87,7 +86,7 @@ def is_sdh(track: dict, sdh: bool) -> bool:
 
 
 def get_out_name(path: Path, track: dict) -> str:
-    lang = Language(track["properties"]["language"]).alpha1
+    lang = Language.from_str(track["properties"]["language"]).alpha1
     return f"{path.stem}.{lang}.srt"
 
 
@@ -100,7 +99,7 @@ def extract(path: Path, track: dict):
 
 def main():
     args = parser.parse_args()
-    if args.id and (args.lang or args.sdh):
+    if args.id and (args.lang != DEFAULT_LANGUAGE or args.sdh):
         parser.error("--id and --lang|--sdh are mutually exclusive")
 
     logging.basicConfig(
