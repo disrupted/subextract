@@ -1,6 +1,6 @@
 [project]
 name = "subextract"
-version = "0.2.1"
+version = "0.3.0"
 description = "CLI for easy extraction of subtitles from mkv files"
 license = "GPL-3.0-only"
 requires-python = ">=3.15"
