@@ -35,6 +35,7 @@ parser.add_argument(
 parser.add_argument(
     "--lang",
     help="Language to extract (default: en)",
+    type=Language.from_str,
     default=DEFAULT_LANGUAGE,
 )
 parser.add_argument(
@@ -49,7 +50,7 @@ parser.add_argument(
     "file",
     nargs="+",
     metavar="FILE",
-    type=argparse.FileType("r"),
+    type=Path,
     help="the .mkv video file",
 )
 
@@ -61,13 +62,13 @@ def mkvextract(track_id: int, path: Path, out_filename: str):
         "tracks",
         f"{track_id}:{path.with_name(out_filename)}",
     ]
-    proc = subprocess.run(mkvextract_args)
+    proc = subprocess.run(mkvextract_args, check=True)
     return proc
 
 
 def identify(path: Path) -> dict:
     mkvmerge_args = ["mkvmerge", "-F", "json", "-i", path]
-    proc = subprocess.run(mkvmerge_args, stdout=subprocess.PIPE)
+    proc = subprocess.run(mkvmerge_args, stdout=subprocess.PIPE, check=True)
     return json.loads(proc.stdout)
 
 
@@ -107,9 +108,8 @@ def main():
         format="%(levelname)s | %(message)s",
     )
 
-    for f in args.file:
-        path = Path(f.name)
-        if path.suffix not in ".mkv":
+    for path in args.file:
+        if path.suffix != ".mkv":
             logging.error(f"wrong file extension {path.suffix}")
             sys.exit(1)
 
@@ -119,7 +119,7 @@ def main():
             try:
                 tracks = [data["tracks"][args.id]]
             except IndexError:
-                logging.error(f"subtitle with id {args.id} doesn't exist")
+                logging.exception(f"subtitle with id {args.id} doesn't exist")
                 sys.exit(1)
         else:
             tracks = [

@@ -1,0 +1,28 @@
+name: Lint GitHub CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/**
+      - mise.toml
+
+jobs:
+  jactionlint:
+    name: jactionlint
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install jactionlint
+        uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+        env:
+          MISE_NO_HOOKS: "1"
+        with:
+          version: "2026.10.5"
+          install_args: "jactionlint shellcheck"
+
+      - name: jactionlint
+        run: jactionlint --pyflakes= --format=github
